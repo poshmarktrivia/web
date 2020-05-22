@@ -1,0 +1,94 @@
+body {
+  width: 100%;
+  height: 500px;
+  opacity: 0.7;
+  background-color: #000000 !important;
+  font-family: 'Orbitron' !important;
+  background-image: url('~@/assets/Space-Background-v2.png');
+}
+
+.trivia__level {
+  color: #43dfef;
+  font-size: 28px;
+  font-weight: bold;
+  float: left;
+  margin-bottom: 45px;
+}
+
+.trivia__question-box {
+  width: 597.8px;
+  height: 267.2px;
+}
+
+.trivia__question {
+  padding-top: 60px;
+}
+
+.trivia__question-name {
+  font-size: 36px;
+  font-weight: 900;
+  text-align: center;
+  color: #ffffff;
+  max-width: 33%;
+  position: relative;
+  bottom: 200px;
+}
+
+.trivia__textbox {
+  width: 268px;
+  height: 50px;
+  opacity: 0.4;
+  border-radius: 10px;
+  border: solid 2px #81e0ff;
+  background-color: darkblue;
+  color: white;
+  padding-left: 10px;
+}
+
+.trivia__options {
+  width: 597.8px;
+}
+
+.top-spacing {
+  margin-top: 25px;
+}
+
+.rotateQuestion {
+  -ms-transform: rotate(20deg);
+  transform: rotate(20deg);
+}
+
+.resetRotateQuestion {
+  transform: none;
+}
+
+.trivia_quiz-man {
+  width: 800px;
+  height: 500px;
+}
+
+.trivia__pm-logo {
+  width: 150px;
+  height: 150px;
+  margin-top: 30px;
+}
+
+.trivia__man-spacing {
+  margin-top: 150px;
+  margin-left: 70px;
+}
+
+.trivia__title {
+  font-size: 100px;
+  font-weight: bold;
+  color: white;
+}
+
+.trivia__start {
+  border-radius: 40px;
+  border: solid 10px #98d604;
+  background-color: #67ba5e;
+  width: 270px;
+  height: 80px;
+  color: white;
+}
