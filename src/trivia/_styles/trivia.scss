@@ -23,7 +23,7 @@ body {
 }
 
 .trivia__question-name {
-  font-size: 36px;
+  font-size: 30px;
   font-weight: 900;
   text-align: center;
   color: #ffffff;
@@ -88,4 +88,19 @@ body {
   width: 270px;
   height: 80px;
   color: white;
+}
+
+.trivia__name {
+  font-size: 48px;
+  margin-top: 50px;
+  margin-bottom: 30px;
+}
+
+.trivia_name-box {
+  margin-bottom: 30px;
+}
+
+.trivia__score-img {
+  width: 600px;
+  height: 250px;
 }

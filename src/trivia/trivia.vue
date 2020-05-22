@@ -12,7 +12,16 @@
       </div>
       <div class="d--fl ai--c fd--c" v-if="screenName === 'start'">
         <div class="trivia__title">POSH QUIZ</div>
-        <button @click="startQuiz" class="trivia__start">START</button>
+        <button @click="screenName = 'fill_details'" class="trivia__start">START</button>
+      </div>
+      <div class="d--fl ai--c fd--c" v-if="screenName === 'fill_details'">
+        <div class="trivia__title trivia__name">What is your name?</div>
+        <input class="trivia__textbox trivia_name-box" type="text" v-model="name" />
+        <button @click="startQuiz" class="trivia__start">GO</button>
+      </div>
+      <div class="d--fl ai--c fd--c" v-if="screenName === 'score'">
+        <img class="trivia_name-box trivia__score-img" src="./_images/score.gif" />
+        <div class="trivia__level">Hey {{ name }}! Your score is {{ score }}</div>
       </div>
       <div v-if="screenName !== 'quiz'" class="trivia__man-spacing"><img class="trivia_quiz-man" src="./_images/Man.png" /></div>
     </div>
@@ -24,14 +33,18 @@
       <img class="trivia__question-box" alt="question_box" src="./_images/Question-Box.png" />
       <span class="trivia__question-name">{{ questionList.questions[questionNumber].question }}</span>
       <div class="d--fl jc--sb trivia__options">
-        <input @click="optionClick" type="text" class="trivia__textbox" :value="questionList.questions[questionNumber].options[0].option1" readonly />
-        <input @click="optionClick" type="text" class="trivia__textbox" :value="questionList.questions[questionNumber].options[0].option2" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[0].option1" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[0].option2" readonly />
       </div>
       <div
         v-if="questionList.questions[questionNumber].options[0].option3 && questionList.questions[questionNumber].options[0].option4"
         class="d--fl jc--sb trivia__options top-spacing">
-        <input @click="optionClick" type="text" class="trivia__textbox" :value="questionList.questions[questionNumber].options[0].option3" readonly />
-        <input @click="optionClick" type="text" class="trivia__textbox" :value="questionList.questions[questionNumber].options[0].option4" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[0].option3" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[0].option4" readonly />
       </div>
     </div>
   </div>
@@ -48,7 +61,9 @@ export default {
       rotateQuestion: '',
       screenName: 'welcome',
       countDown : 10,
-      questions: {}
+      questions: {},
+      score: 0,
+      name: ''
     };
   },
   computed: {
@@ -58,34 +73,49 @@ export default {
         type: 'multi',
         questions: [
           {
-            question: 'some question 1?',
+            question: 'An offer be cancelled by both seller and buyer?',
             type: 'multi',
             options: [{
-              option1: 'someA',
-              option2: 'someB',
-              option3: 'someC',
-              option4: 'someD'
-            }]
+              option1: true,
+              option2: false
+            }],
+            answer: false
           },
           {
-            question: 'some question 2?',
+            question: 'Can I create stories in iPad?',
             type: 'multi',
             options: [{
-              option1: 'someAf',
-              option2: 'someBC',
-              option3: 'someCs',
-              option4: 'someDd'
-            }]
+              option1: true,
+              option2: false
+            }],
+            answer: false
           },
           {
-            question: 'some question 3?',
+            question: 'Can we save 10 drafts in create listing?',
             type: 'multi',
             options: [{
-              option1: 'someAf33',
-              option2: 'someBC3',
-              option3: 'someCs3',
-              option4: 'someDd3'
-            }]
+              option1: true,
+              option2: false
+            }],
+            answer: false
+          },
+          {
+            question: 'Poshmark was launched on 2011?',
+            type: 'multi',
+            options: [{
+              option1: true,
+              option2: false
+            }],
+            answer: true
+          },
+          {
+            question: 'First PoshFest was held in Las Vegas?',
+            type: 'multi',
+            options: [{
+              option1: true,
+              option2: false
+            }],
+            answer: true
           }
         ]
       }
@@ -103,18 +133,19 @@ export default {
         if (event)
           event.target.style.background = 'none';
         this.rotateQuestion = 'resetRotateQuestion';
-      } else {
-        window.location.assign('/');
       }
     },
-    optionClick (event) {
+    optionClick (event, answer) {
+      if (event.target.value === String(answer)) {
+        this.score++;
+      }
       event.target.style.background = '#00c818';
 
       if (this.questionNumber < this.questionCount - 1) {
+        this.countDown = 10;
         this.rotateQuestion = 'rotateQuestion';
       } else {
-        alert("Score is 2");
-        window.location.assign('/');
+        this.screenName = 'score';
       }
 
       setTimeout(() => {
@@ -133,6 +164,7 @@ export default {
         }, 1000)
       } else {
         this.moveNext();
+        this.countDownTimer();
       }
     },
     async readQuestions () {
