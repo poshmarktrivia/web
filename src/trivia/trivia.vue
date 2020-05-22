@@ -19,6 +19,7 @@
     <div
       v-if="screenName === 'quiz'"
       class="d--fl ai--c fd--c trivia__question" :class="rotateQuestion">
+      <div class="trivia__level">Time left: {{ countDown }}</div>
       <div class="trivia__level">Level 1</div>
       <img class="trivia__question-box" alt="question_box" src="./_images/Question-Box.png" />
       <span class="trivia__question-name">{{ questionList.questions[questionNumber].question }}</span>
@@ -43,12 +44,14 @@ export default {
     return {
       questionNumber: 0,
       rotateQuestion: '',
-      screenName: 'welcome'
+      screenName: 'welcome',
+      countDown : 10
     };
   },
   computed: {
     questionList () {
       return {
+        level: 'level1',
         type: 'multi',
         questions: [
           {
@@ -92,6 +95,8 @@ export default {
     moveNext (event) {
       if (this.questionNumber < this.questionCount - 1) {
         this.questionNumber++;
+        this.countDown = 10;
+
         if (event)
           event.target.style.background = 'none';
         this.rotateQuestion = 'resetRotateQuestion';
@@ -115,6 +120,17 @@ export default {
     },
     startQuiz () {
       this.screenName = 'quiz';
+      this.countDownTimer();
+    },
+    countDownTimer() {
+      if(this.countDown > 0) {
+        setTimeout(() => {
+          this.countDown -= 1;
+          this.countDownTimer();
+        }, 1000)
+      } else {
+        this.moveNext();
+      }
     }
   },
   mounted () {
