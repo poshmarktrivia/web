@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Trivia',
   data () {
@@ -45,7 +47,8 @@ export default {
       questionNumber: 0,
       rotateQuestion: '',
       screenName: 'welcome',
-      countDown : 10
+      countDown : 10,
+      questions: {}
     };
   },
   computed: {
@@ -130,6 +133,12 @@ export default {
         }, 1000)
       } else {
         this.moveNext();
+      }
+    },
+    async readQuestions () {
+      const response = await axios.get(`http://jsonplaceholder.typicode.com/posts`);
+      if (response && response.data) {
+       this.questions = response.data;
       }
     }
   },
