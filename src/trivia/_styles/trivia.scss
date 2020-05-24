@@ -104,3 +104,35 @@ body {
   width: 600px;
   height: 250px;
 }
+
+.trivia__level-con {
+  opacity: 0.95;
+  margin-left: 30%;
+  margin-top: 5%;
+  width: 500px;
+}
+
+.trivia__level-box {
+  width: 569px;
+  height: 523px;
+}
+
+.trivia__level-welcome {
+  font-size: 28px;
+  font-weight: 900;
+  color: #f5ff00;
+  margin-bottom: 20px;
+}
+
+.trivia__level-rule {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.trivia__level-details {
+  text-align: center;
+  position: relative;
+  bottom: 400px;
+}

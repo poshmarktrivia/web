@@ -23,7 +23,7 @@
         <img class="trivia_name-box trivia__score-img" src="./_images/score.gif" />
         <div class="trivia__level">Hey {{ name }}! Your score is {{ score }}</div>
       </div>
-      <div v-if="screenName !== 'quiz'" class="trivia__man-spacing"><img class="trivia_quiz-man" src="./_images/Man.png" /></div>
+      <div v-if="screenName !== 'quiz' && screenName !== 'levelScreen'" class="trivia__man-spacing"><img class="trivia_quiz-man" src="./_images/Man.png" /></div>
     </div>
     <div
       v-if="screenName === 'quiz'"
@@ -33,18 +33,28 @@
       <img class="trivia__question-box" alt="question_box" src="./_images/Question-Box.png" />
       <span class="trivia__question-name">{{ questionList.questions[questionNumber].question }}</span>
       <div class="d--fl jc--sb trivia__options">
-        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[0].option1" readonly />
-        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[0].option2" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[0]" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[1]" readonly />
       </div>
       <div
-        v-if="questionList.questions[questionNumber].options[0].option3 && questionList.questions[questionNumber].options[0].option4"
+        v-if="questionList.questions[questionNumber].options[2] && questionList.questions[questionNumber].options[3]"
         class="d--fl jc--sb trivia__options top-spacing">
-        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[0].option3" readonly />
-        <input @click="optionClick($event, questionList.questions[questionNumber].answer)" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[0].option4" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[2]" readonly />
+        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList.questions[questionNumber].options[3]" readonly />
+      </div>
+    </div>
+    <div
+      class="d--fl ai--c fd--c trivia__level-con"
+      v-else-if="screenName === 'levelScreen'">
+      <img class="trivia__level-box" alt="question_box" src="./_images/Question-Box.png" />
+      <div class="trivia__level-details">
+        <p class="trivia__level-welcome">Welcome to level 2</p>
+        <p class="trivia__level-rule">Rules are simple, guess all the words hidden in the cross word with the hints given.</p>
+        <button @click="nextLevel" class="trivia__start">GO</button>
       </div>
     </div>
   </div>
@@ -60,66 +70,15 @@ export default {
       questionNumber: 0,
       rotateQuestion: '',
       screenName: 'welcome',
-      countDown : 10,
+      countDown : 0,
       questions: {},
       score: 0,
-      name: ''
+      name: '',
+      questionList: {},
+      level: 1
     };
   },
   computed: {
-    questionList () {
-      return {
-        level: 'level1',
-        type: 'multi',
-        questions: [
-          {
-            question: 'An offer be cancelled by both seller and buyer?',
-            type: 'multi',
-            options: [{
-              option1: true,
-              option2: false
-            }],
-            answer: false
-          },
-          {
-            question: 'Can I create stories in iPad?',
-            type: 'multi',
-            options: [{
-              option1: true,
-              option2: false
-            }],
-            answer: false
-          },
-          {
-            question: 'Can we save 10 drafts in create listing?',
-            type: 'multi',
-            options: [{
-              option1: true,
-              option2: false
-            }],
-            answer: false
-          },
-          {
-            question: 'Poshmark was launched on 2011?',
-            type: 'multi',
-            options: [{
-              option1: true,
-              option2: false
-            }],
-            answer: true
-          },
-          {
-            question: 'First PoshFest was held in Las Vegas?',
-            type: 'multi',
-            options: [{
-              option1: true,
-              option2: false
-            }],
-            answer: true
-          }
-        ]
-      }
-    },
     questionCount () {
       return this.questionList.questions.length;
     }
@@ -139,13 +98,17 @@ export default {
       if (event.target.value === String(answer)) {
         this.score++;
       }
-      event.target.style.background = '#00c818';
+      event.target.style.background = 'lightblue';
 
       if (this.questionNumber < this.questionCount - 1) {
         this.countDown = 10;
         this.rotateQuestion = 'rotateQuestion';
       } else {
-        this.screenName = 'score';
+        if (this.level === 2) {
+          this.screenName = 'score';
+        } else {
+          this.screenName = 'levelScreen';
+        }
       }
 
       setTimeout(() => {
@@ -153,7 +116,15 @@ export default {
       }, 1000);
     },
     startQuiz () {
+      axios.post('http://poshmark-trivia-server.herokuapp.com/api/users/newuser', {
+        name: this.name,
+        is_admin: false
+      })
+      .then(function (response) {
+        console.log(response);
+      });
       this.screenName = 'quiz';
+      this.countDown = 10;
       this.countDownTimer();
     },
     countDownTimer() {
@@ -164,17 +135,25 @@ export default {
         }, 1000)
       } else {
         this.moveNext();
-        this.countDownTimer();
+        if (this.countDown > 0)
+          this.countDownTimer();
       }
     },
     async readQuestions () {
-      const response = await axios.get(`http://jsonplaceholder.typicode.com/posts`);
+      const response = await axios.get(`http://poshmark-trivia-server.herokuapp.com/api/questions/${this.level}`);
       if (response && response.data) {
-       this.questions = response.data;
+       this.questionList = response.data;
       }
+    },
+    nextLevel () {
+      this.level++;
+      this.screenName = 'quiz';
+      this.questionNumber = 0;
+      this.readQuestions();
     }
   },
   mounted () {
+    this.readQuestions(1);
     setTimeout(() => { this.screenName = 'start'; }, 2000);
   }
 };
