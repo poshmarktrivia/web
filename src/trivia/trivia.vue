@@ -105,6 +105,10 @@ export default {
         this.rotateQuestion = 'rotateQuestion';
       } else {
         if (this.level === 2) {
+          axios.put('http://poshmark-trivia-server.herokuapp.com/api/score', {
+            name: this.name,
+            score: this.score
+          });
           this.screenName = 'score';
         } else {
           this.screenName = 'levelScreen';
