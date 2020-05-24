@@ -31,20 +31,20 @@
       <div class="trivia__level">Time left: {{ countDown }}</div>
       <div class="trivia__level">Level 1</div>
       <img class="trivia__question-box" alt="question_box" src="./_images/Question-Box.png" />
-      <span class="trivia__question-name">{{ questionList.questions[questionNumber].question }}</span>
+      <span class="trivia__question-name">{{ questionList[questionNumber].question }}</span>
       <div class="d--fl jc--sb trivia__options">
-        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[0]" readonly />
-        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[1]" readonly />
+        <input @click="optionClick($event, questionList[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList[questionNumber].options[0]" readonly />
+        <input @click="optionClick($event, questionList[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList[questionNumber].options[1]" readonly />
       </div>
       <div
-        v-if="questionList.questions[questionNumber].options[2] && questionList.questions[questionNumber].options[3]"
+        v-if="questionList[questionNumber].options[2] && questionList[questionNumber].options[3]"
         class="d--fl jc--sb trivia__options top-spacing">
-        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[2]" readonly />
-        <input @click="optionClick($event, questionList.questions[questionNumber].answers[0])" type="text" class="trivia__textbox"
-               :value="questionList.questions[questionNumber].options[3]" readonly />
+        <input @click="optionClick($event, questionList[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList[questionNumber].options[2]" readonly />
+        <input @click="optionClick($event, questionList[questionNumber].answers[0])" type="text" class="trivia__textbox"
+               :value="questionList[questionNumber].options[3]" readonly />
       </div>
     </div>
     <div
@@ -74,13 +74,13 @@ export default {
       questions: {},
       score: 0,
       name: '',
-      questionList: {},
+      questionList: [],
       level: 1
     };
   },
   computed: {
     questionCount () {
-      return this.questionList.questions.length;
+      return this.questionList.length;
     }
   },
   methods: {
@@ -94,7 +94,7 @@ export default {
         this.rotateQuestion = 'resetRotateQuestion';
       }
     },
-    optionClick (event, answer) {
+    async optionClick (event, answer) {
       if (event.target.value === String(answer)) {
         this.score++;
       }
@@ -104,11 +104,8 @@ export default {
         this.countDown = 10;
         this.rotateQuestion = 'rotateQuestion';
       } else {
-        if (this.level === 2) {
-          axios.put('http://poshmark-trivia-server.herokuapp.com/api/score', {
-            name: this.name,
-            score: this.score
-          });
+        if (this.level === 1) {
+          await axios.put('http://poshmark-trivia-server.herokuapp.com/api/scores/newscore', `input_string={"name": "${this.name}","score": ${this.score}}`);
           this.screenName = 'score';
         } else {
           this.screenName = 'levelScreen';
@@ -119,14 +116,8 @@ export default {
         this.moveNext(event);
       }, 1000);
     },
-    startQuiz () {
-      axios.post('http://poshmark-trivia-server.herokuapp.com/api/users/newuser', {
-        name: this.name,
-        is_admin: false
-      })
-      .then(function (response) {
-        console.log(response);
-      });
+    async startQuiz () {
+      await axios.post('http://poshmark-trivia-server.herokuapp.com/api/users/newuser', `input_string={"name": "${this.name}","is_admin":false}`);
       this.screenName = 'quiz';
       this.countDown = 10;
       this.countDownTimer();
@@ -146,11 +137,12 @@ export default {
     async readQuestions () {
       const response = await axios.get(`http://poshmark-trivia-server.herokuapp.com/api/questions/${this.level}`);
       if (response && response.data) {
-       this.questionList = response.data;
+        const shuffled = response.data.questions.sort(() => 0.5 - Math.random());
+        this.questionList = shuffled.slice(0, 10);
       }
     },
     nextLevel () {
-      this.level++;
+      // this.level++;
       this.screenName = 'quiz';
       this.questionNumber = 0;
       this.readQuestions();

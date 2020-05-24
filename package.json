@@ -12,6 +12,7 @@
     "bootstrap": "^4.5.0",
     "bootstrap-vue": "^2.14.0",
     "core-js": "^3.6.4",
+    "qs": "^6.9.4",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vue-style-loader": "^4.1.2"
