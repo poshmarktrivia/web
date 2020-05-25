@@ -107,20 +107,14 @@ export default {
       }
     },
     async optionClick (event, answer) {
-      console.log('level', this.level);
       if (this.level === 1 && event.target.value === String(answer)) {
         this.score++;
-        console.log('score 1', this.score);
       } else if (this.level === 2) {
-        console.log('cr', this.crosswordAnswer);
         if (this.crosswordAnswer && this.crosswordAnswer.length && this.crosswordAnswer.split(',').length) {
-          console.log('bef');
           this.crosswordAnswer.toLowerCase().split(',').forEach((item) => {
-            console.log('lo', item);
             if (answer.includes(item.trim())) {
               this.score += 2;
             }
-            console.log('score 2', this.score);
           });
         }
         this.crosswordAnswer = '';
@@ -164,11 +158,11 @@ export default {
     async readQuestions () {
       const response = await axios.get(`http://poshmark-trivia-server.herokuapp.com/api/questions/${this.level}`);
       if (response && response.data) {
+        const shuffled = response.data.questions.sort(() => 0.5 - Math.random());
         if (this.level === 1) {
-          const shuffled = response.data.questions.sort(() => 0.5 - Math.random());
           this.questionList = shuffled.slice(0, 10);
         } else if (this.level === 2) {
-          this.questionList = response.data.questions.slice(1, 5);
+          this.questionList = shuffled.slice(0, 1);
         }
       }
     },
