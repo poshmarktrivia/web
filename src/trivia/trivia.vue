@@ -23,13 +23,14 @@
         <img class="trivia_name-box trivia__score-img" src="./_images/score.gif" />
         <div class="trivia__level">Hey {{ name }}! Your score is {{ score }}</div>
       </div>
-      <div v-if="screenName !== 'quiz' && screenName !== 'levelScreen'" class="trivia__man-spacing"><img class="trivia_quiz-man" src="./_images/Man.png" /></div>
+      <div v-if="screenName !== 'quiz-level1' && screenName !== 'quiz-level2' && screenName !== 'levelScreen'" class="trivia__man-spacing">
+        <img class="trivia_quiz-man" src="./_images/Man.png" /></div>
     </div>
     <div
-      v-if="screenName === 'quiz'"
+      v-if="screenName === 'quiz-level1'"
       class="d--fl ai--c fd--c trivia__question" :class="rotateQuestion">
       <div class="trivia__level">Time left: {{ countDown }}</div>
-      <div class="trivia__level">Level 1</div>
+      <div class="trivia__level">Level {{ level }}</div>
       <img class="trivia__question-box" alt="question_box" src="./_images/Question-Box.png" />
       <span class="trivia__question-name">{{ questionList[questionNumber].question }}</span>
       <div class="d--fl jc--sb trivia__options">
@@ -46,6 +47,16 @@
         <input @click="optionClick($event, questionList[questionNumber].answers[0])" type="text" class="trivia__textbox"
                :value="questionList[questionNumber].options[3]" readonly />
       </div>
+    </div>
+    <div
+      v-if="screenName === 'quiz-level2'"
+      class="d--fl ai--c fd--c trivia__question" :class="rotateQuestion">
+      <div class="trivia__level">Time left: {{ countDown }}</div>
+      <div class="trivia__level">Level {{ level }}</div>
+      <img class="trivia__crossword-img trivia_name-box" :src="`${questionList[questionNumber].options[0].replace('?dl=0','')}?raw=1`" />
+      <input v-model="crosswordAnswer" placeholder="Type <word 1>, <word 2>" type="text" class="trivia__textbox trivia_name-box" />
+      <span class="trivia__checkbox-msg">Please specify your answers as comma separated. Eg: word 1, word 2</span>
+      <button @click="optionClick($event, questionList[questionNumber].answers)" class="trivia__start">Move Next</button>
     </div>
     <div
       class="d--fl ai--c fd--c trivia__level-con"
@@ -75,7 +86,8 @@ export default {
       score: 0,
       name: '',
       questionList: [],
-      level: 1
+      level: 1,
+      crosswordAnswer: ''
     };
   },
   computed: {
@@ -87,7 +99,7 @@ export default {
     moveNext (event) {
       if (this.questionNumber < this.questionCount - 1) {
         this.questionNumber++;
-        this.countDown = 10;
+        this.countDown = this.level === 1 ? 10 : 90;
 
         if (event)
           event.target.style.background = 'none';
@@ -95,16 +107,31 @@ export default {
       }
     },
     async optionClick (event, answer) {
-      if (event.target.value === String(answer)) {
+      console.log('level', this.level);
+      if (this.level === 1 && event.target.value === String(answer)) {
         this.score++;
+        console.log('score 1', this.score);
+      } else if (this.level === 2) {
+        console.log('cr', this.crosswordAnswer);
+        if (this.crosswordAnswer && this.crosswordAnswer.length && this.crosswordAnswer.split(',').length) {
+          console.log('bef');
+          this.crosswordAnswer.toLowerCase().split(',').forEach((item) => {
+            console.log('lo', item);
+            if (answer.includes(item.trim())) {
+              this.score += 2;
+            }
+            console.log('score 2', this.score);
+          });
+        }
+        this.crosswordAnswer = '';
       }
       event.target.style.background = 'lightblue';
 
       if (this.questionNumber < this.questionCount - 1) {
-        this.countDown = 10;
+        this.countDown = this.level === 1 ? 10 : 90;
         this.rotateQuestion = 'rotateQuestion';
       } else {
-        if (this.level === 1) {
+        if (this.level === 2) {
           await axios.put('http://poshmark-trivia-server.herokuapp.com/api/scores/newscore', `input_string={"name": "${this.name}","score": ${this.score}}`);
           this.screenName = 'score';
         } else {
@@ -118,8 +145,8 @@ export default {
     },
     async startQuiz () {
       await axios.post('http://poshmark-trivia-server.herokuapp.com/api/users/newuser', `input_string={"name": "${this.name}","is_admin":false}`);
-      this.screenName = 'quiz';
-      this.countDown = 10;
+      this.screenName = 'quiz-level1';
+      this.countDown = this.level === 1 ? 10 : 90;
       this.countDownTimer();
     },
     countDownTimer() {
@@ -137,19 +164,24 @@ export default {
     async readQuestions () {
       const response = await axios.get(`http://poshmark-trivia-server.herokuapp.com/api/questions/${this.level}`);
       if (response && response.data) {
-        const shuffled = response.data.questions.sort(() => 0.5 - Math.random());
-        this.questionList = shuffled.slice(0, 10);
+        if (this.level === 1) {
+          const shuffled = response.data.questions.sort(() => 0.5 - Math.random());
+          this.questionList = shuffled.slice(0, 10);
+        } else if (this.level === 2) {
+          this.questionList = response.data.questions.slice(1, 5);
+        }
       }
     },
     nextLevel () {
-      // this.level++;
-      this.screenName = 'quiz';
+      this.level++;
+      this.screenName = `quiz-level${this.level}`;
       this.questionNumber = 0;
       this.readQuestions();
+      this.countDown = this.level === 1 ? 10 : 90;
     }
   },
   mounted () {
-    this.readQuestions(1);
+    this.readQuestions(this.level);
     setTimeout(() => { this.screenName = 'start'; }, 2000);
   }
 };

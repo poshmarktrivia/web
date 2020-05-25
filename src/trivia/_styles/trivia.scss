@@ -23,7 +23,7 @@ body {
 }
 
 .trivia__question-name {
-  font-size: 30px;
+  font-size: 25px;
   font-weight: 900;
   text-align: center;
   color: #ffffff;
@@ -135,4 +135,16 @@ body {
   text-align: center;
   position: relative;
   bottom: 400px;
+}
+
+.trivia__crossword-img {
+  width: 800px;
+  height: 300px;
+}
+
+.trivia__checkbox-msg {
+  color: white;
+  font-size: 20px;
+  font-weight: bolder;
+  margin-bottom: 30px;
 }
